@@ -12,6 +12,7 @@ Item {
     required property var bar
     required property Brightness.Monitor monitor
     property color colour: Colours.palette.m3primary
+    property bool isCurrentMonitor: monitor.modelData.name === Hypr.focusedMonitor?.name
 
     readonly property int maxHeight: {
         const otherModules = bar.children.filter(c => c.id && c.item !== this && c.id !== "spacer");
@@ -46,13 +47,16 @@ Item {
     TextMetrics {
         id: metrics
 
-        text: Hypr.activeToplevel?.title ?? qsTr("Desktop")
+        property string lastActiveTitle: "Desktop"
+
+        text: isCurrentMonitor ? Hypr.activeToplevel?.title ?? qsTr("Desktop") : lastActiveTitle
         font.pointSize: Appearance.font.size.smaller
         font.family: Appearance.font.family.mono
         elide: Qt.ElideRight
         elideWidth: root.maxHeight - icon.height
 
         onTextChanged: {
+            lastActiveTitle = text;
             const next = root.current === text1 ? text2 : text1;
             next.text = elidedText;
             root.current = next;

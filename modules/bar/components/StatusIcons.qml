@@ -147,7 +147,7 @@ StyledRect {
 
             sourceComponent: MaterialIcon {
                 animate: true
-                text: Network.active ? Icons.getNetworkIcon(Network.active.strength ?? 0) : "wifi_off"
+                text: Network.active ? Icons.getNetworkIcon(Network.active.strength ?? 0, Network.active.isSecure ?? false) : "wifi_off"
                 color: root.colour
             }
         }

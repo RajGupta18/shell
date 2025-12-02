@@ -26,7 +26,10 @@ Singleton {
     }
 
     function rescanWifi(): void {
-        rescanProc.running = true;
+        if(!rescanProc.running)
+        {
+            rescanProc.running = true;
+        }
     }
 
     function connectToNetwork(ssid: string): void {

@@ -75,14 +75,8 @@ ColumnLayout {
                 }
 
                 MaterialIcon {
-                    text: Icons.getNetworkIcon(networkItem.modelData.strength)
+                    text: Icons.getNetworkIcon(networkItem.modelData.strength, networkItem.modelData.isSecure)
                     color: networkItem.modelData.active ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
-                }
-
-                MaterialIcon {
-                    visible: networkItem.modelData.isSecure
-                    text: "lock"
-                    font.pointSize: Appearance.font.size.small
                 }
 
                 StyledText {

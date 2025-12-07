@@ -104,9 +104,9 @@ Item {
             screen: root.screen
             active: root.queuedMode
 
-            function close(): void {
-                root.close();
-            }
+            // function close(): void {
+            //     root.close();
+            // }
         }
     }
 

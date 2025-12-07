@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import qs.components
 import qs.components.controls
+import qs.modules.controlcenter
 import qs.services
 import qs.config
 import qs.utils
@@ -176,7 +177,8 @@ ColumnLayout {
             color: Colours.palette.m3onPrimaryContainer
 
             function onClicked(): void {
-                root.wrapper.detach("bluetooth");
+                WindowFactory.create();
+                // root.wrapper.detach("bluetooth");
             }
         }
 

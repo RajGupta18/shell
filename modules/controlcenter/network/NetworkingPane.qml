@@ -1,0 +1,218 @@
+pragma ComponentBehavior: Bound
+
+import ".."
+import "../components"
+import "."
+import qs.components
+import qs.components.controls
+import qs.components.effects
+import qs.components.containers
+import qs.services
+import qs.config
+import qs.utils
+import QtQuick
+import QtQuick.Layouts
+
+Item {
+    id: root
+
+    required property Session session
+
+    anchors.fill: parent
+
+    SplitPaneLayout {
+        id: splitLayout
+
+        anchors.fill: parent
+
+        leftContent: Component {
+            StyledFlickable {
+                id: leftFlickable
+
+                flickableDirection: Flickable.VerticalFlick
+                contentHeight: leftContent.height
+
+                StyledScrollBar.vertical: StyledScrollBar {
+                    flickable: leftFlickable
+                }
+
+                ColumnLayout {
+                    id: leftContent
+
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    spacing: Appearance.spacing.normal
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Appearance.spacing.smaller
+
+                        StyledText {
+                            text: qsTr("Network")
+                            font.pointSize: Appearance.font.size.large
+                            font.weight: 500
+                        }
+
+                        Item {
+                            Layout.fillWidth: true
+                        }
+
+                        ToggleButton {
+                            toggled: Network.wifiEnabled
+                            icon: "wifi"
+                            accent: "Tertiary"
+                            iconSize: Appearance.font.size.normal
+                            horizontalPadding: Appearance.padding.normal
+                            verticalPadding: Appearance.padding.smaller
+                            tooltip: qsTr("Toggle WiFi")
+
+                            onClicked: {
+                                Network.toggleWifi();
+                            }
+                        }
+
+                        ToggleButton {
+                            toggled: Network.scanning
+                            icon: "wifi_find"
+                            accent: "Secondary"
+                            iconSize: Appearance.font.size.normal
+                            horizontalPadding: Appearance.padding.normal
+                            verticalPadding: Appearance.padding.smaller
+                            tooltip: qsTr("Scan for networks")
+
+                            onClicked: {
+                                Network.rescanWifi();
+                            }
+                        }
+                    }
+
+                    CollapsibleSection {
+                        id: wirelessListSection
+
+                        Layout.fillWidth: true
+                        title: qsTr("Wireless")
+                        expanded: true
+
+                        Loader {
+                            Layout.fillWidth: true
+                            sourceComponent: Component {
+                                WirelessList {
+                                    session: root.session
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        rightContent: Component {
+            Item {
+                id: rightPaneItem
+                
+                property var wirelessPane: root.session.network.active
+                property var pane: wirelessPane
+                property string paneId: (wirelessPane ? ("wifi:" + (wirelessPane.ssid || wirelessPane.bssid || "")) : "settings")
+                property Component targetComponent: settingsComponent
+                property Component nextComponent: settingsComponent
+
+                function getComponentForPane() {
+                    if (wirelessPane) return wirelessDetailsComponent;
+                    return settingsComponent;
+                }
+
+                Component.onCompleted: {
+                    targetComponent = getComponentForPane();
+                    nextComponent = targetComponent;
+                }
+
+                Connections {
+                    target: root.session.network
+                    function onActiveChanged() {
+                        rightPaneItem.nextComponent = rightPaneItem.getComponentForPane();
+                        // paneId will automatically update via property binding
+                    }
+                }
+
+                Loader {
+                    id: rightLoader
+
+                    anchors.fill: parent
+
+                    opacity: 1
+                    scale: 1
+                    transformOrigin: Item.Center
+                    clip: false
+
+                    asynchronous: true
+                    sourceComponent: rightPaneItem.targetComponent
+                }
+
+                Behavior on paneId {
+                    PaneTransition {
+                        target: rightLoader
+                        propertyActions: [
+                            PropertyAction {
+                                target: rightPaneItem
+                                property: "targetComponent"
+                                value: rightPaneItem.nextComponent
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+
+    Component {
+        id: settingsComponent
+
+        StyledFlickable {
+            id: settingsFlickable
+            flickableDirection: Flickable.VerticalFlick
+            contentHeight: settingsInner.height
+
+            StyledScrollBar.vertical: StyledScrollBar {
+                flickable: settingsFlickable
+            }
+
+            NetworkSettings {
+                id: settingsInner
+
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                session: root.session
+            }
+        }
+    }
+
+    Component {
+        id: wirelessDetailsComponent
+
+        StyledFlickable {
+            id: wirelessFlickable
+            flickableDirection: Flickable.VerticalFlick
+            contentHeight: wirelessDetailsInner.height
+
+            StyledScrollBar.vertical: StyledScrollBar {
+                flickable: wirelessFlickable
+            }
+
+            WirelessDetails {
+                id: wirelessDetailsInner
+
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                session: root.session
+            }
+        }
+    }
+
+    WirelessPasswordDialog {
+        anchors.fill: parent
+        session: root.session
+        z: 1000
+    }
+}

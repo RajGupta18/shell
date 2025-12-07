@@ -3,6 +3,7 @@ pragma Singleton
 import qs.components
 import qs.services
 import Quickshell
+import Quickshell.Hyprland
 import QtQuick
 
 Singleton {
@@ -27,11 +28,6 @@ Singleton {
 
             color: Colours.tPalette.m3surface
 
-            onVisibleChanged: {
-                if (!visible)
-                    destroy();
-            }
-
             minimumSize.width: 1000
             minimumSize.height: 600
 
@@ -45,15 +41,16 @@ Singleton {
 
                 anchors.fill: parent
                 screen: win.screen
-                floating: true
-
-                function close(): void {
-                    win.destroy();
-                }
             }
 
             Behavior on color {
                 CAnim {}
+            }
+
+            HyprlandFocusGrab {
+                active: win.active
+                windows: [QsWindow.window]
+                onCleared: QsWindow.window.destroy();
             }
         }
     }

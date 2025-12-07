@@ -12,6 +12,7 @@ Singleton {
     property bool wifiEnabled: true
     readonly property bool scanning: rescanProc.running
     property bool isconnectionFailed: false
+    property bool isnetworkconnected: false
 
     property string _currentssid: ""
 
@@ -56,6 +57,11 @@ Singleton {
 
     function deleteNetwork(ssid: string): bool {
         disconnectProc.exec(["nmcli", "conn", "delete", ssid])
+    }
+
+    function hasSavedProfile(ssid: string): bool {
+        // to-do
+        return false;
     }
 
     Process {
@@ -115,6 +121,9 @@ Singleton {
                 root.isconnectionFailed = true;
                 root.deleteNetwork(root._currentssid);
             }
+            else {
+                root.isnetworkconnected = true;
+            }
         }
     }
 
@@ -123,6 +132,12 @@ Singleton {
 
         stdout: SplitParser {
             onRead: getNetworks.running = true
+        }
+
+        onExited: code => {
+            if(code == 0) {
+                root.isnetworkconnected = false;
+            }
         }
     }
 

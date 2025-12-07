@@ -12,20 +12,15 @@ Item {
     id: root
 
     required property ShellScreen screen
-    readonly property int rounding: floating ? 0 : Appearance.rounding.normal
 
-    property alias floating: session.floating
-    property alias active: session.active
-    property alias navExpanded: session.navExpanded
-
+    readonly property int rounding: Appearance.rounding.normal
     readonly property Session session: Session {
         id: session
-
         root: root
     }
 
-    function close(): void {
-    }
+    property alias active: session.active
+    property alias navExpanded: session.navExpanded
 
     implicitWidth: implicitHeight * Config.controlCenter.sizes.ratio
     implicitHeight: screen.height * Config.controlCenter.sizes.heightMult
@@ -35,7 +30,7 @@ Item {
 
         rowSpacing: 0
         columnSpacing: 0
-        rows: root.floating ? 2 : 1
+        rows: 1
         columns: 2
 
         Loader {
@@ -43,8 +38,7 @@ Item {
             Layout.columnSpan: 2
 
             asynchronous: true
-            active: root.floating
-            visible: active
+            visible: true
 
             sourceComponent: WindowTitle {
                 screen: root.screen
@@ -73,7 +67,6 @@ Item {
 
             NavRail {
                 id: navRail
-
                 screen: root.screen
                 session: root.session
             }
